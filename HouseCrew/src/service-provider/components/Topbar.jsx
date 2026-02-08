@@ -8,7 +8,7 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
   const navigate = useNavigate();
 
   const handleProfile = () => {
-    navigate('/customer/profile');
+    navigate('/service-provider/profile');
     setProfileOpen(false);
   };
 
@@ -49,7 +49,7 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
           {/* TITLE */}
           <div className="flex items-center gap-1">
             <h1 className="text-sm sm:text-sm lg:text-lg xl:text-2xl font-bold truncate">
-              Customer Dashboard
+              Service Provider Dashboard
             </h1>
           </div>
         </div>
@@ -107,10 +107,10 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
               {/* USER INFO - HIDDEN ON MOBILE */}
               <div className="hidden sm:block text-left">
                 <p className={`text-[8px] sm:text-xs font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Bhanu
+                  Provider
                 </p>
                 <p className={`text-[8px] sm:text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Customer
+                  Service Provider
                 </p>
               </div>
               

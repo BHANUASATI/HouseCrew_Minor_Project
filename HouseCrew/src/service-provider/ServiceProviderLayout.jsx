@@ -2,43 +2,37 @@ import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 
-export default function CustomerLayout({ children }) {
+export default function ServiceProviderLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  // 🌙 DARK MODE INITIALIZATION
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // Auto-close sidebar on desktop, keep state on mobile
-      if (!mobile) {
-        setSidebarOpen(false);
-      }
-    };
-
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    
+    setDarkMode(shouldBeDark);
+    if (shouldBeDark) {
+      document.documentElement.classList.add("dark");
     }
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // 📱 MOBILE DETECTION
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // 🌙 TOGGLE THEME
   const toggleTheme = () => {
     const newTheme = !darkMode;
     setDarkMode(newTheme);
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", newTheme);
   };
 
   return (
@@ -63,7 +57,7 @@ export default function CustomerLayout({ children }) {
       
       {/* MAIN CONTENT */}
       <div className={`flex-1 transition-all duration-300 overflow-hidden ${
-        isMobile ? 'ml-0' : 'ml-0'
+        isMobile ? 'ml-0' : 'ml-64'
       }`}>
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} darkMode={darkMode} toggleTheme={toggleTheme} />
         <div className="pt-2 p-4 sm:p-5 lg:p-8 overflow-y-auto">{children}</div>

@@ -9,7 +9,7 @@ export default function StatCard({
   trendValue = "12%",
   sparkData = [10, 20, 15, 30, 25, 40],
   onClick,
-  color = "bg-indigo-600"
+  color = "bg-blue-600"
 }) {
   const [count, setCount] = useState(0);
 
@@ -101,7 +101,7 @@ export default function StatCard({
           >
             <polyline
               fill="none"
-              stroke="#6366f1"
+              stroke="#3B82F6"
               strokeWidth="2"
               points={sparkPath}
               strokeLinecap="round"

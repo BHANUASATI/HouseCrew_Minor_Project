@@ -31,6 +31,7 @@ import Contact from "./components/Contact";
 
 import AuthPage from "./components/AuthPage";
 import CustomerRoutes from "./customer/routes/CustomerRoutes";
+import ServiceProviderRoutes from "./service-provider/routes/ServiceProviderRoutes";
 
 export default function App() {
   return (
@@ -56,6 +57,9 @@ export default function App() {
 
       {/* 👤 CUSTOMER DASHBOARD (NO Navbar / Footer) */}
       <Route path="/customer/*" element={<CustomerRoutes />} />
+
+      {/* 🔧 SERVICE PROVIDER DASHBOARD (NO Navbar / Footer) */}
+      <Route path="/service-provider/*" element={<ServiceProviderRoutes />} />
     </Routes>
   );
 }

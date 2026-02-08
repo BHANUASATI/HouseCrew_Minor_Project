@@ -29,8 +29,9 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-slate-300 text-sm leading-relaxed max-w-xs">
-              HouseCrew is a technology-enabled home services platform delivering
-              trusted, verified, and premium-quality services at your doorstep.
+              HouseCrew is a location-based home services platform connecting
+              households with trusted professionals for cleaning, repairs,
+              maintenance, and installations — delivered safely and on time.
             </p>
           </div>
 
@@ -39,33 +40,32 @@ const Footer = () => {
             <h4 className="font-semibold mb-5 text-white">Company</h4>
             <ul className="space-y-3 text-sm text-slate-400">
               {[
-                "About us",
-                "Investor Relations",
+                "About HouseCrew",
                 "Careers",
-                "ESG Impact",
+                "Press & Media",
                 "Terms & Conditions",
                 "Privacy Policy",
-                "Anti-discrimination Policy",
               ].map((item, i) => (
-                <li
-                  key={i}
-                  className="cursor-pointer transition hover:text-orange-400"
-                >
+                <li key={i} className="cursor-pointer transition hover:text-orange-400">
                   {item}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* CUSTOMERS */}
+          {/* SERVICES */}
           <div>
-            <h4 className="font-semibold mb-5 text-white">For Customers</h4>
+            <h4 className="font-semibold mb-5 text-white">Popular Services</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              {["Reviews", "Categories near you", "Contact us"].map((item, i) => (
-                <li
-                  key={i}
-                  className="cursor-pointer transition hover:text-orange-400"
-                >
+              {[
+                "Home Cleaning",
+                "Electrician Services",
+                "Plumbing Services",
+                "AC Repair & Service",
+                "Salon at Home",
+                "Painting Services",
+              ].map((item, i) => (
+                <li key={i} className="cursor-pointer transition hover:text-orange-400">
                   {item}
                 </li>
               ))}
@@ -74,15 +74,19 @@ const Footer = () => {
 
           {/* PROFESSIONALS */}
           <div>
-            <h4 className="font-semibold mb-5 text-white">
-              For Professionals
-            </h4>
+            <h4 className="font-semibold mb-5 text-white">For Professionals</h4>
             <ul className="space-y-3 text-sm text-slate-400">
               <li className="cursor-pointer transition hover:text-orange-400">
-                Register as a professional
+                Join as a Service Partner
               </li>
               <li className="cursor-pointer transition hover:text-orange-400">
-                Partner App
+                Partner Support
+              </li>
+              <li className="cursor-pointer transition hover:text-orange-400">
+                Safety & Verification
+              </li>
+              <li className="cursor-pointer transition hover:text-orange-400">
+                Partner Earnings Model
               </li>
             </ul>
           </div>
@@ -90,6 +94,9 @@ const Footer = () => {
           {/* SOCIAL */}
           <div>
             <h4 className="font-semibold mb-5 text-white">Connect with us</h4>
+            <p className="text-sm text-slate-400 mb-4">
+              Follow HouseCrew for updates, offers, and service tips.
+            </p>
             <div className="flex gap-4">
               {[
                 <FaFacebookF />,
@@ -100,21 +107,7 @@ const Footer = () => {
               ].map((icon, i) => (
                 <div
                   key={i}
-                  className="
-                    w-11 h-11 rounded-full
-                    bg-white/5 backdrop-blur
-                    border border-white/10
-                    flex items-center justify-center
-                    text-slate-300
-                    cursor-pointer
-                    transition-all duration-300
-                    hover:scale-110
-                    hover:text-white
-                    hover:bg-gradient-to-r
-                    hover:from-orange-500
-                    hover:to-pink-500
-                    hover:shadow-[0_0_25px_rgba(236,72,153,0.6)]
-                  "
+                  className="w-11 h-11 rounded-full bg-white/5 backdrop-blur border border-white/10 flex items-center justify-center text-slate-300 cursor-pointer transition-all duration-300 hover:scale-110 hover:text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-pink-500 hover:shadow-[0_0_25px_rgba(236,72,153,0.6)]"
                 >
                   {icon}
                 </div>
@@ -129,12 +122,11 @@ const Footer = () => {
 
         {/* ================= BOTTOM ================= */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-400">
-          <p>* As on December 31, 2024</p>
+          <p>Serving homes with trusted professionals across multiple cities in India.</p>
 
           <p className="text-center md:text-right">
             © {new Date().getFullYear()}{" "}
-            <span className="text-white font-medium">HouseCrew</span>.  
-            All rights reserved.
+            <span className="text-white font-medium">HouseCrew</span>. All rights reserved.
           </p>
         </div>
 
