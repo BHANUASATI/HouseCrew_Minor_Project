@@ -8,9 +8,10 @@ import Profile from "../pages/Profile";
 export default function CustomerRoutes() {
   return (
     <Routes>
+      <Route path="dashboard" element={<Dashboard />} />
       <Route path="/" element={<Dashboard />} />
-      <Route path="request" element={<RequestService />} />
-      <Route path="track" element={<TrackService />} />
+      <Route path="request-service" element={<RequestService />} />
+      <Route path="track-service" element={<TrackService />} />
       <Route path="payments" element={<Payments />} />
       <Route path="profile" element={<Profile />} />
     </Routes>

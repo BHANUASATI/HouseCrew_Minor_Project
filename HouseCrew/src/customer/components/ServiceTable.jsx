@@ -10,13 +10,11 @@ import {
 /* 🔹 STATUS CONFIG */
 const statusConfig = {
   "In Progress": {
-    color:
-      "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400",
+    color: "bg-amber-100 text-amber-700 border border-amber-200 font-semibold",
     icon: <FaClock />,
   },
   Completed: {
-    color:
-      "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400",
+    color: "bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold",
     icon: <FaCheckCircle />,
   },
 };
@@ -44,34 +42,67 @@ export default function ServiceTable() {
   ];
 
   return (
-    <div
-      className="relative rounded-2xl overflow-hidden
-      bg-white/80 dark:bg-slate-900/80
-      backdrop-blur-xl border border-white/30 dark:border-slate-700
-      shadow-[0_20px_40px_rgba(0,0,0,0.08)]
-      dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
-    >
-      {/* 🌈 GLOW BACKGROUND */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-400/20 blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-400/20 blur-3xl" />
+    <div className="relative rounded-xl overflow-hidden
+      bg-white dark:bg-gray-900 
+      border border-gray-200 dark:border-gray-700
+      shadow-lg">
+      {/* 🌈 SUBTLE GLOW BACKGROUND */}
+      <div className="absolute -top-12 -left-12 w-48 h-48 bg-blue-100/20 blur-xl" />
+      <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-100/20 blur-xl" />
 
-      <table className="relative z-10 w-full text-sm">
-        <thead>
-          <tr className="text-slate-500 dark:text-slate-400 border-b border-white/20">
-            <th className="text-left py-4 px-4">Service</th>
-            <th className="text-center">Status</th>
-            <th className="text-center">Date</th>
-            <th className="text-center">Amount</th>
-            <th className="text-center">Action</th>
-          </tr>
-        </thead>
+      {/* TABLE CONTAINER - Responsive */}
+      <div className="relative z-10 overflow-x-auto">
+        <table className="w-full text-xs min-w-[400px] sm:min-w-[500px] lg:min-w-[600px]">
+          <thead>
+            <tr className="text-gray-600 font-semibold border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+              <th className="text-left py-3 px-4 font-bold text-xs sm:text-sm">Service</th>
+              <th className="text-center min-w-[80px] font-bold text-xs sm:text-sm">Status</th>
+              <th className="text-center min-w-[100px] font-bold text-xs sm:text-sm">Date</th>
+              <th className="text-center min-w-[80px] font-bold text-xs sm:text-sm">Amount</th>
+              <th className="text-center min-w-[100px] font-bold text-xs sm:text-sm">Action</th>
+            </tr>
+          </thead>
 
-        <tbody>
-          {services.map((item, i) => (
-            <TableRow key={i} item={item} index={i} />
-          ))}
-        </tbody>
-      </table>
+          <tbody>
+            {services.map((item, i) => (
+              <tr
+                key={i}
+                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              >
+                <td className="py-3 px-4 font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                  {item.service}
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium ${
+                      statusConfig[item.status].color
+                    }`}
+                  >
+                    {statusConfig[item.status].icon}
+                    {item.status}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                  {item.date}
+                </td>
+                <td className="py-3 px-4 text-center font-semibold text-gray-800 dark:text-gray-200 text-xs sm:text-sm">
+                  {item.amount}
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-300 hover:bg-blue-700 hover:shadow-lg text-xs sm:text-sm"
+                  >
+                    <FaEye className="text-xs sm:text-sm" />
+                    <span className="hidden sm:inline ml-1">View</span>
+                  </motion.button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -86,40 +117,42 @@ function TableRow({ item, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
       whileHover={{ scale: 1.01 }}
-      className="group border-b border-white/10
-      hover:bg-white/40 dark:hover:bg-slate-800/40 transition"
+      className="group border-b border-gray-100
+      hover:bg-blue-50/50 transition-all duration-200"
     >
       {/* SERVICE */}
-      <td className="py-4 px-4 flex items-center gap-3 font-medium text-slate-700 dark:text-slate-200">
-        <span className="p-2 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
-          <FaTools />
-        </span>
-        {item.service}
+      <td className="py-2 sm:py-3 px-2 sm:px-3">
+        <div className="flex items-center gap-2 font-semibold text-gray-700">
+          <span className="p-1.5 sm:p-2 rounded-lg bg-blue-100 text-blue-600 flex-shrink-0">
+            <FaTools className="text-xs sm:text-base" />
+          </span>
+          <span className="truncate text-xs sm:text-sm">{item.service}</span>
+        </div>
       </td>
 
       {/* STATUS */}
-      <td className="text-center">
+      <td className="text-center py-2 sm:py-3">
         <span
-          className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full ${status.color}`}
+          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap ${status.color}`}
         >
-          {status.icon}
-          {item.status}
+          <span className="text-xs">{status.icon}</span>
+          <span className="text-xs">{item.status}</span>
         </span>
       </td>
 
       {/* DATE */}
-      <td className="text-center text-slate-600 dark:text-slate-300">
+      <td className="text-center py-2 sm:py-3 text-gray-600 font-medium whitespace-nowrap text-xs sm:text-sm">
         {item.date}
       </td>
 
       {/* AMOUNT */}
-      <td className="text-center font-semibold text-slate-800 dark:text-white">
+      <td className="text-center py-2 sm:py-3 font-bold text-gray-800 whitespace-nowrap text-xs sm:text-sm">
         {item.amount}
       </td>
 
       {/* ACTION */}
-      <td className="text-center">
-        <div className="flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition">
+      <td className="text-center py-2 sm:py-3">
+        <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition">
           <ActionBtn icon={<FaEye />} label="View" />
           {item.status !== "Completed" && (
             <ActionBtn
@@ -140,14 +173,15 @@ function ActionBtn({ icon, label, accent }) {
     <motion.button
       whileHover={{ scale: 1.15 }}
       whileTap={{ scale: 0.9 }}
-      className={`p-2 rounded-lg shadow
+      className={`p-1.5 sm:p-2 rounded-lg shadow-sm transition-all duration-200
       ${
         accent
-          ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white"
-          : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200"
+          ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600"
+          : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200"
       }`}
+      title={label}
     >
-      {icon}
+      <span className="text-xs sm:text-sm">{icon}</span>
     </motion.button>
   );
 }

@@ -3,22 +3,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FaHome,
   FaTools,
-  FaMapMarkedAlt,
+  FaCalendarAlt,
   FaWallet,
   FaUser,
   FaSignOutAlt,
   FaTimes,
+  FaClipboardList,
+  FaStar,
 } from "react-icons/fa";
 
 const menu = [
-  { name: "Dashboard", path: "/customer/dashboard", icon: FaHome },
-  { name: "Request Service", path: "/customer/request-service", icon: FaTools },
-  { name: "Track Service", path: "/customer/track-service", icon: FaMapMarkedAlt },
-  { name: "Payments", path: "/customer/payments", icon: FaWallet },
-  { name: "Profile", path: "/customer/profile", icon: FaUser },
+  { name: "Dashboard", path: "/service-provider/dashboard", icon: FaHome },
+  { name: "My Services", path: "/service-provider/my-services", icon: FaTools },
+  { name: "Bookings", path: "/service-provider/bookings", icon: FaCalendarAlt },
+  { name: "Earnings", path: "/service-provider/earnings", icon: FaWallet },
+  { name: "Reviews", path: "/service-provider/reviews", icon: FaStar },
+  { name: "Profile", path: "/service-provider/profile", icon: FaUser },
 ];
 
-export default function Sidebar({ isOpen, setIsOpen, darkMode }) {
+export default function Sidebar({ isOpen, setIsOpen, darkMode, isMobile }) {
   const handleLogout = () => {
     // Clear any auth tokens or user data
     localStorage.removeItem('authToken');
@@ -51,15 +54,17 @@ export default function Sidebar({ isOpen, setIsOpen, darkMode }) {
                 darkMode 
                   ? 'bg-gradient-to-b from-gray-800 via-gray-900 to-black' 
                   : 'bg-gradient-to-b from-[#4f46e5] via-[#6d28d9] to-[#7c3aed]'
-              }`}
+              }`} md:hidden
             >
-              {/* ❌ CLOSE (mobile only) */}
-              <button
+              {/* ✖️ CLOSE BUTTON */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 text-xl p-2 rounded-lg hover:bg-white/10 transition md:hidden"
+                className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <FaTimes />
-              </button>
+              </motion.button>
 
               {/* 🔮 Glow */}
               <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl" />
@@ -108,27 +113,29 @@ export default function Sidebar({ isOpen, setIsOpen, darkMode }) {
                 })}
               </nav>
 
-              {/* LOGOUT BUTTON */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-all duration-200 border border-red-400/30"
-                >
-                  <FaSignOutAlt />
-                  <span>Logout</span>
-                </button>
-              </div>
+              {/* LOGOUT */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="relative z-10 mx-4 mt-8 flex items-center gap-4 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 transition-colors"
+              >
+                <FaSignOutAlt className="text-xl" />
+                <span>Logout</span>
+              </motion.button>
             </motion.aside>
           </>
         )}
       </AnimatePresence>
-      
-      {/* 🖥️ DESKTOP SIDEBAR - Always visible on md+ screens */}
-      <aside className={`hidden md:block w-64 h-screen sticky top-0 text-white shadow-2xl overflow-hidden ${
+
+      {/* 🖥️ DESKTOP SIDEBAR */}
+      <aside className={`fixed left-0 top-0 h-full w-64 transition-all duration-300 z-30 ${
         darkMode 
           ? 'bg-gradient-to-b from-gray-800 via-gray-900 to-black' 
           : 'bg-gradient-to-b from-[#4f46e5] via-[#6d28d9] to-[#7c3aed]'
-      }`}>
+      } ${isMobile ? '-translate-x-full' : 'translate-x-0'}`}>
         {/* 🔮 Glow */}
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl" />
@@ -175,16 +182,18 @@ export default function Sidebar({ isOpen, setIsOpen, darkMode }) {
           })}
         </nav>
 
-        {/* LOGOUT BUTTON */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-all duration-200 border border-red-400/30"
-          >
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
-        </div>
+        {/* LOGOUT */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="relative z-10 mx-4 mt-8 flex items-center gap-4 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 transition-colors"
+        >
+          <FaSignOutAlt className="text-xl" />
+          <span>Logout</span>
+        </motion.button>
       </aside>
     </>
   );

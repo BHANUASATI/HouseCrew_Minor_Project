@@ -9,12 +9,42 @@ import img5 from "../assets/images/AC.jpg";
 import img6 from "../assets/images/Painter.jpg";
 
 const spotlightData = [
-  { title: "Home Cleaning", img: img1 },
-  { title: "Electrician", img: img2 },
-  { title: "Plumbing", img: img3 },
-  { title: "Salon at Home", img: img4 },
-  { title: "AC Repair", img: img5 },
-  { title: "Painting", img: img6 },
+  {
+    title: "Home Cleaning",
+    img: img1,
+    desc: "Deep cleaning, sofa & carpet care, and complete home hygiene handled by trained professionals.",
+    tag: "Most Booked",
+  },
+  {
+    title: "Electrician",
+    img: img2,
+    desc: "Safe wiring, appliance installation, and quick fault fixing by certified experts.",
+    tag: "Quick Response",
+  },
+  {
+    title: "Plumbing",
+    img: img3,
+    desc: "Leak repairs, pipe fittings, and bathroom installations with long-lasting solutions.",
+    tag: "24/7 Support",
+  },
+  {
+    title: "Salon at Home",
+    img: img4,
+    desc: "Professional beauty & grooming services delivered to your doorstep with hygienic products.",
+    tag: "Luxury Care",
+  },
+  {
+    title: "AC Repair",
+    img: img5,
+    desc: "AC servicing, gas refill, and cooling issue repair for all major brands.",
+    tag: "Summer Essential",
+  },
+  {
+    title: "Painting",
+    img: img6,
+    desc: "Interior & exterior painting with smooth finish and modern color consultation.",
+    tag: "Home Upgrade",
+  },
 ];
 
 const Spotlight = () => {
@@ -65,7 +95,7 @@ const Spotlight = () => {
         {/* SLIDER */}
         <div className="relative">
 
-          {/* LEFT */}
+          {/* LEFT BUTTON */}
           <button
             disabled={!canLeft}
             onClick={() => slide(-1)}
@@ -82,7 +112,7 @@ const Spotlight = () => {
             <FaChevronLeft />
           </button>
 
-          {/* RIGHT */}
+          {/* RIGHT BUTTON */}
           <button
             disabled={!canRight}
             onClick={() => slide(1)}
@@ -108,16 +138,7 @@ const Spotlight = () => {
             {spotlightData.map((item, index) => (
               <div
                 key={index}
-                className="
-                  slide-card snap-start
-                  min-w-[85%] sm:min-w-[45%] md:min-w-[30%]
-                  rounded-3xl overflow-hidden
-                  bg-white/5 backdrop-blur-xl
-                  border border-white/10
-                  transition-all duration-500
-                  hover:-translate-y-2 hover:shadow-[0_25px_60px_rgba(0,0,0,0.7)]
-                  group
-                "
+                className="slide-card snap-start min-w-[85%] sm:min-w-[45%] md:min-w-[30%] rounded-3xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_60px_rgba(0,0,0,0.7)] group"
               >
                 {/* IMAGE */}
                 <div className="relative h-56 overflow-hidden">
@@ -131,23 +152,25 @@ const Spotlight = () => {
 
                 {/* CONTENT */}
                 <div className="p-7">
-                  <h3 className="text-xl font-bold mb-1">
+                  {/* TAG */}
+                  <span className="inline-block text-xs font-semibold tracking-wide text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full mb-3">
+                    {item.tag}
+                  </span>
+
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-orange-400 transition-colors duration-300">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-400 mb-6">
-                    Trusted professionals · On-time service · Transparent pricing
+
+                  <p className="text-sm text-gray-400 mb-5 leading-relaxed">
+                    {item.desc}
                   </p>
 
-                  {/* CTA */}
+                  <p className="text-xs text-gray-500 mb-6">
+                    ✔ Verified Professionals &nbsp;&nbsp; ✔ On-Time Service &nbsp;&nbsp; ✔ Transparent Pricing
+                  </p>
+
                   <button
-                    className="
-                      w-full py-3 rounded-xl font-semibold
-                      bg-gradient-to-r from-orange-500 to-pink-500
-                      hover:from-orange-400 hover:to-pink-400
-                      transition-all duration-300
-                      shadow-lg hover:shadow-orange-500/40
-                      hover:scale-[1.04]
-                    "
+                    className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 transition-all duration-300 shadow-lg hover:shadow-orange-500/40 hover:scale-[1.04]"
                   >
                     Book Premium Service
                   </button>

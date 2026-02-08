@@ -21,12 +21,11 @@ import Auth3D from "../assets/image.png";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register, loading, error, setError, clearError } = useAuth();
 
   const [isSignup, setIsSignup] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -38,50 +37,72 @@ const AuthPage = () => {
     city: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    clearError();
 
     // BASIC VALIDATION
     if (!form.role) {
-      alert("Please select your role");
+      setError("Please select your role");
       return;
     }
 
-    if (isSignup && form.role === "service") {
-      if (!form.phone || !form.skill || !form.city) {
-        alert("Please fill all Service Provider details");
-        return;
-      }
+    if (!form.email || !form.password) {
+      setError("Please fill in all required fields");
+      return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
 
-      if (
-        !isSignup &&
-        form.email === "bhanu@gmail.com" &&
-        form.password === "12345"
-      ) {
-        login({
-          name: "Bhanu",
+    try {
+      if (isSignup) {
+        // REGISTRATION
+        if (form.role === "service" && (!form.phone || !form.skill || !form.city)) {
+          setError("Please fill in all service provider fields");
+          setLoading(false);
+          return;
+        }
+
+        await register({
+          name: form.name,
           email: form.email,
-          role: form.role,
-          token: "demo",
+          password: form.password,
+          role: form.role === "service" ? "service_provider" : "customer",
+          phone: form.phone,
+          skill: form.skill,
+          city: form.city
         });
 
-        navigate(form.role === "service" ? "/provider" : "/customer");
-      } else if (!isSignup) {
-        alert("❌ Invalid email or password");
-      } else {
         alert(
           `🎉 Account Created as ${
             form.role === "service" ? "Service Provider" : "Customer"
-          } (Demo)`
+          }! Please login.`
         );
         setIsSignup(false);
+        setForm({
+          name: "",
+          email: "",
+          password: "",
+          role: "",
+          phone: "",
+          skill: "",
+          city: "",
+        });
+      } else {
+        // LOGIN
+        const response = await login({
+          email: form.email,
+          password: form.password,
+          role: form.role === "service" ? "service_provider" : "customer"
+        });
+
+        navigate(form.role === "service" ? "/service-provider" : "/customer");
       }
-    }, 1200);
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,9 +111,31 @@ const AuthPage = () => {
       ${
         darkMode
           ? "bg-black"
-          : "bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100"
+          : "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600"
       }`}
     >
+      {/* ANIMATED BACKGROUND ELEMENTS */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
+      </div>
+
+      {/* FLOATING PARTICLES */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-white/20 rounded-full animate-bounce"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`
+            }}
+          />
+        ))}
+      </div>
       {/* BACK TO HOME */}
       <button
         onClick={() => navigate("/")}
@@ -111,29 +154,54 @@ const AuthPage = () => {
         {darkMode ? <FaSun /> : <FaMoon />}
       </button>
 
+      {/* ERROR DISPLAY */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50
+          bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg"
+        >
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+            <button
+              onClick={clearError}
+              className="ml-4 text-white hover:text-red-200"
+            >
+              ✕
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* CARD */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`relative z-10 w-full max-w-4xl mt-24 rounded-3xl shadow-2xl
-        backdrop-blur-xl border overflow-hidden
+        initial={{ opacity: 0, y: 30, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className={`relative z-10 w-full max-w-5xl mt-24 rounded-3xl shadow-2xl
+        backdrop-blur-xl border overflow-hidden transform hover:scale-105 transition-transform duration-300
         ${
           darkMode
-            ? "bg-gray-900/80 text-white border-white/10"
-            : "bg-white/80 border-white/40"
+            ? "bg-gray-900/90 text-white border-white/20 shadow-black/50"
+            : "bg-white/90 border-white/60 shadow-black/20"
         }`}
       >
+        {/* GLOW EFFECT */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl" />
+        
         {/* LOGIN / SIGNUP */}
-        <div className="flex justify-center mt-8">
-          <div className="relative flex w-72 bg-white rounded-full p-1 shadow-md">
+        <div className="flex justify-center mt-8 relative z-10">
+          <div className="relative flex w-80 bg-white/90 backdrop-blur rounded-full p-1 shadow-lg">
             <motion.div
-              className="absolute top-1 bottom-1 w-1/2 rounded-full
-              bg-gradient-to-r from-orange-500 to-pink-500"
+              className="absolute top-1 bottom-1 w-1/2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg"
               animate={{ x: isSignup ? "100%" : "0%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
             <button
               onClick={() => setIsSignup(false)}
-              className={`relative z-10 w-1/2 py-2 font-semibold ${
+              className={`relative z-10 w-1/2 py-2 font-semibold transition-colors duration-300 ${
                 !isSignup ? "text-white" : "text-gray-600"
               }`}
             >
@@ -141,7 +209,7 @@ const AuthPage = () => {
             </button>
             <button
               onClick={() => setIsSignup(true)}
-              className={`relative z-10 w-1/2 py-2 font-semibold ${
+              className={`relative z-10 w-1/2 py-2 font-semibold transition-colors duration-300 ${
                 isSignup ? "text-white" : "text-gray-600"
               }`}
             >
@@ -151,25 +219,35 @@ const AuthPage = () => {
         </div>
 
         {/* CONTENT */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 items-center relative z-10">
           {/* IMAGE */}
-          <div className="flex flex-col items-center p-6 text-center">
-            <img src={Auth3D} alt="Auth" className="w-44 md:w-56 mb-4" />
-            <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+          <div className="flex flex-col items-center p-8 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-2xl opacity-50 animate-pulse" />
+              <img src={Auth3D} alt="Auth" className="relative w-48 md:w-64 mb-6 transform hover:scale-110 transition-transform duration-300" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               {isSignup ? "Create Account" : "Welcome Back"}
             </h1>
-            <p className="text-sm opacity-80 mt-2">
-              Login as Customer or Service Provider
+            <p className="text-white/90 text-lg font-medium">
+              {isSignup ? "Join our community" : "Login to continue"}
+            </p>
+            <p className="text-white/70 text-sm mt-2">
+              Access as Customer or Service Provider
             </p>
           </div>
 
           {/* FORM */}
-          <div className="p-6 md:p-10">
+          <div className="p-8 md:p-12">
             <AnimatePresence mode="wait">
               <motion.form
                 key={isSignup ? "signup" : "login"}
                 onSubmit={handleSubmit}
-                className="space-y-4"
+                className="space-y-5"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
               >
                 {isSignup && (
                   <Input
@@ -245,17 +323,35 @@ const AuthPage = () => {
                 </div>
 
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={loading}
-                  className="w-full py-3 rounded-xl font-semibold text-white
-                  bg-gradient-to-r from-orange-500 to-pink-500 shadow-lg"
+                  className="w-full py-4 rounded-xl font-bold text-white text-lg
+                  bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg hover:shadow-xl
+                  transform transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading
-                    ? "Processing..."
-                    : isSignup
-                    ? "Create Account"
-                    : "Login"}
+                  <span className="flex items-center justify-center gap-2">
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        {isSignup ? (
+                          <>
+                            <span>Create Account</span>
+                            <span className="text-xl">🎉</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Login</span>
+                            <span className="text-xl">🚀</span>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </span>
                 </motion.button>
               </motion.form>
             </AnimatePresence>
