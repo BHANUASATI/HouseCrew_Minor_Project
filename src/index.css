@@ -1,0 +1,13 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"); */
+
+@import "tailwindcss";
+
+.nav-link {
+  @apply text-gray-700 font-medium hover:text-blue-600 transition;
+}
+
+.mobile-link {
+  @apply text-gray-800 font-semibold text-lg hover:text-blue-600 transition;
+}
+
+
