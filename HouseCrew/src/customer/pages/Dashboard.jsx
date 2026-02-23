@@ -5,9 +5,26 @@ import ServiceTable from "../components/ServiceTable";
 import { FaPlus, FaMapMarkedAlt, FaWallet } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Check if user is customer
+    if (user && user.role !== 'customer') {
+      navigate('/auth');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleQuickAction = (action) => {
     switch(action) {
@@ -27,7 +44,7 @@ export default function Dashboard() {
 
   return (
     <CustomerLayout>
-      {/* HEADER - Same as Profile Page */}
+      {/* HEADER - Personalized Welcome */}
       <motion.h2
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -35,8 +52,16 @@ export default function Dashboard() {
         bg-gradient-to-r from-indigo-600 to-sky-500
         bg-clip-text text-transparent"
       >
-        Customer Dashboard
+        Welcome back, {user?.name || 'Customer'}! 👋
       </motion.h2>
+      
+      <motion.p
+        initial={{ opacity: 0, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-gray-600 mb-6 sm:mb-8"
+      >
+        Manage your service requests and track progress from your personal dashboard.
+      </motion.p>
 
       {/* MAIN CONTENT CONTAINER - BIG SCREEN LARGER */}
       <motion.div
@@ -47,6 +72,19 @@ export default function Dashboard() {
       >
         {/* STATS GRID - BIG SCREEN LARGER CARDS */}
         <div className="flex flex-col gap-4 max-sm:grid max-sm:grid-cols-1 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-sm:gap-4 sm:gap-4 lg:gap-6 xl:gap-8 mb-6 sm:mb-8">
+        {/* USER PROFILE CARD */}
+        <div className="w-full sm:w-full">
+          <div className="bg-gradient-to-r from-indigo-500 to-sky-500 rounded-xl p-6 text-white">
+            <h3 className="text-lg font-semibold mb-2">Profile Info</h3>
+            <div className="space-y-2 text-sm">
+              <p><span className="opacity-80">Name:</span> {user?.name || 'N/A'}</p>
+              <p><span className="opacity-80">Email:</span> {user?.email || 'N/A'}</p>
+              <p><span className="opacity-80">Role:</span> Customer</p>
+              <p><span className="opacity-80">Member Since:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Today'}</p>
+            </div>
+          </div>
+        </div>
+        
         <div className="w-full sm:w-full">
           <StatCard title="Total Requests" value="12" color="bg-indigo-600" />
         </div>

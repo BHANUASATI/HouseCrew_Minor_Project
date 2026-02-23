@@ -60,7 +60,9 @@ export const AuthProvider = ({ children }) => {
       register,
       logout, 
       loading,
+      setLoading,
       error,
+      setError,
       clearError,
       isAuthenticated: ApiService.isAuthenticated()
     }}>

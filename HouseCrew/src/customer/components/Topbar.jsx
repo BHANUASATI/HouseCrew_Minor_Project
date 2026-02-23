@@ -2,10 +2,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaBell, FaUser, FaSun, FaMoon, FaChevronDown, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
 
   const handleProfile = () => {
     navigate('/customer/profile');
@@ -18,9 +20,9 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    window.location.href = '/auth';
+    logout();
+    navigate('/auth');
+    setProfileOpen(false);
   };
 
   return (
@@ -107,7 +109,7 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
               {/* USER INFO - HIDDEN ON MOBILE */}
               <div className="hidden sm:block text-left">
                 <p className={`text-[8px] sm:text-xs font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Bhanu
+                  {user?.name || 'Guest'}
                 </p>
                 <p className={`text-[8px] sm:text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   Customer
