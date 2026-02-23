@@ -21,7 +21,7 @@ import Auth3D from "../assets/image.png";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { login, register, loading, error, setError, clearError } = useAuth();
+  const { login, register, loading, setLoading, error, setError, clearError } = useAuth();
 
   const [isSignup, setIsSignup] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -52,33 +52,64 @@ const AuthPage = () => {
       return;
     }
 
+    // EMAIL VALIDATION
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    // PASSWORD VALIDATION
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    // NAME VALIDATION FOR SIGNUP
+    if (isSignup && !form.name.trim()) {
+      setError("Please enter your full name");
+      return;
+    }
+
+    // SERVICE PROVIDER VALIDATION
+    if (isSignup && form.role === "service") {
+      if (!form.phone || !form.skill || !form.city) {
+        setError("Please fill in all service provider fields");
+        return;
+      }
+
+      // PHONE VALIDATION
+      const phoneRegex = /^[+]?[\d\s\-()]+$/;
+      if (!phoneRegex.test(form.phone)) {
+        setError("Please enter a valid phone number");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
       if (isSignup) {
         // REGISTRATION
-        if (form.role === "service" && (!form.phone || !form.skill || !form.city)) {
-          setError("Please fill in all service provider fields");
-          setLoading(false);
-          return;
-        }
-
-        await register({
-          name: form.name,
-          email: form.email,
+        // REGISTRATION
+        const response = await register({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
           password: form.password,
           role: form.role === "service" ? "service_provider" : "customer",
-          phone: form.phone,
-          skill: form.skill,
-          city: form.city
+          phone: form.phone ? form.phone.trim() : undefined,
+          skill: form.skill ? form.skill.trim() : undefined,
+          city: form.city ? form.city.trim() : undefined
         });
 
+        // SUCCESS MESSAGE
         alert(
-          `🎉 Account Created as ${
+          `🎉 Account Created Successfully!\n\nWelcome ${form.name}!\n\nYour account has been created as a ${
             form.role === "service" ? "Service Provider" : "Customer"
-          }! Please login.`
+          }.\n\nPlease login with your credentials to continue.`
         );
-        setIsSignup(false);
+        
+        // RESET FORM
         setForm({
           name: "",
           email: "",
@@ -88,15 +119,28 @@ const AuthPage = () => {
           skill: "",
           city: "",
         });
+        
+        // SWITCH TO LOGIN
+        setIsSignup(false);
       } else {
         // LOGIN
         const response = await login({
-          email: form.email,
+          email: form.email.trim().toLowerCase(),
           password: form.password,
           role: form.role === "service" ? "service_provider" : "customer"
         });
 
-        navigate(form.role === "service" ? "/service-provider" : "/customer");
+        // SUCCESS MESSAGE
+        alert(
+          `🎉 Login Successful!\n\nWelcome back, ${response.user.name}!\n\nRedirecting to your dashboard...`
+        );
+
+        // REDIRECT BASED ON ROLE
+        if (form.role === "service") {
+          navigate("/service-provider");
+        } else {
+          navigate("/customer");
+        }
       }
     } catch (err) {
       setError(err.message || "Something went wrong");
@@ -253,6 +297,7 @@ const AuthPage = () => {
                   <Input
                     icon={<FaUser />}
                     placeholder="Full Name"
+                    value={form.name}
                     onChange={(e) =>
                       setForm({ ...form, name: e.target.value })
                     }
@@ -278,6 +323,7 @@ const AuthPage = () => {
                     <Input
                       icon={<FaPhone />}
                       placeholder="Phone Number"
+                      value={form.phone}
                       onChange={(e) =>
                         setForm({ ...form, phone: e.target.value })
                       }
@@ -285,6 +331,7 @@ const AuthPage = () => {
                     <Input
                       icon={<FaTools />}
                       placeholder="Skill (e.g. Electrician)"
+                      value={form.skill}
                       onChange={(e) =>
                         setForm({ ...form, skill: e.target.value })
                       }
@@ -292,6 +339,7 @@ const AuthPage = () => {
                     <Input
                       icon={<FaCity />}
                       placeholder="City"
+                      value={form.city}
                       onChange={(e) =>
                         setForm({ ...form, city: e.target.value })
                       }
@@ -301,7 +349,9 @@ const AuthPage = () => {
 
                 <Input
                   icon={<FaEnvelope />}
-                  placeholder="Email"
+                  type="email"
+                  placeholder="Email Address"
+                  value={form.email}
                   onChange={(e) =>
                     setForm({ ...form, email: e.target.value })
                   }
@@ -311,6 +361,7 @@ const AuthPage = () => {
                   <FaLock className="mr-3 opacity-70" />
                   <input
                     type={showPass ? "text" : "password"}
+                    value={form.password}
                     placeholder="Password"
                     className="w-full bg-transparent outline-none"
                     onChange={(e) =>
@@ -323,12 +374,13 @@ const AuthPage = () => {
                 </div>
 
                 <motion.button
+                  type="submit"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={loading}
                   className="w-full py-4 rounded-xl font-bold text-white text-lg
                   bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg hover:shadow-xl
-                  transform transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  transform transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <span className="flex items-center justify-center gap-2">
                     {loading ? (
@@ -365,21 +417,31 @@ const AuthPage = () => {
 export default AuthPage;
 
 /* INPUT */
-function Input({ icon, ...props }) {
+function Input({ icon, value, onChange, ...props }) {
   return (
     <div className="flex items-center border rounded-xl px-4 py-3">
       <span className="mr-3 opacity-70">{icon}</span>
-      <input className="w-full bg-transparent outline-none" {...props} />
+      <input 
+        value={value}
+        onChange={onChange}
+        className="w-full bg-transparent outline-none" 
+        {...props} 
+      />
     </div>
   );
 }
 
 /* SELECT */
-function Select({ icon, children, ...props }) {
+function Select({ icon, children, value, onChange, ...props }) {
   return (
     <div className="flex items-center border rounded-xl px-4 py-3">
       <span className="mr-3 opacity-70">{icon}</span>
-      <select className="w-full bg-transparent outline-none" {...props}>
+      <select 
+        value={value}
+        onChange={onChange}
+        className="w-full bg-transparent outline-none" 
+        {...props}
+      >
         {children}
       </select>
     </div>
