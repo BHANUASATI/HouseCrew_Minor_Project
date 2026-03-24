@@ -1,57 +1,49 @@
 import ServiceProviderLayout from "../ServiceProviderLayout";
 import { motion } from "framer-motion";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import ApiService from "../../services/apiService";
+import { useAuth } from "../../context/AuthContext";
 
 export default function MyServices() {
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      title: "Home Cleaning",
-      description: "Professional home cleaning services",
-      price: 1200,
-      duration: "2-3 hours",
-      category: "Cleaning",
-      status: "active",
-      image: "/api/placeholder/640/480/cleaning"
-    },
-    {
-      id: 2,
-      title: "Plumbing Repair",
-      description: "Expert plumbing repair and installation",
-      price: 800,
-      duration: "1-2 hours",
-      category: "Repair",
-      status: "active",
-      image: "/api/placeholder/640/480/plumbing"
-    },
-    {
-      id: 3,
-      title: "Electrical Work",
-      description: "Complete electrical solutions",
-      price: 1500,
-      duration: "2-4 hours",
-      category: "Electrical",
-      status: "inactive",
-      image: "/api/placeholder/640/480/electrical"
-    },
-    {
-      id: 4,
-      title: "Gardening",
-      description: "Professional gardening and landscaping",
-      price: 600,
-      duration: "3-4 hours",
-      category: "Outdoor",
-      status: "active",
-      image: "/api/placeholder/640/480/gardening"
-    }
-  ]);
-
+  const { user } = useAuth();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
 
+  // Load services based on user's skill
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        setLoading(true);
+        if (user?.skill) {
+          const data = await ApiService.getServices(user.skill);
+          setServices(data.services || []);
+          setError(null);
+        } else {
+          setServices([]);
+          setError("No skill specified. Please update your profile.");
+        }
+      } catch (err) {
+        setError(err.message);
+        setServices([]);
+        console.error('Failed to load services:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadServices();
+  }, [user?.skill]);
+
+  // Get unique categories from services
+  const categories = [...new Set(services.map(service => service.category))];
+
   const filteredServices = services.filter(service => {
-    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterCategory === "all" || service.category === filterCategory;
     return matchesSearch && matchesFilter;
   });
@@ -59,17 +51,57 @@ export default function MyServices() {
   return (
     <ServiceProviderLayout>
       {/* HEADER */}
-      <motion.h2
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-2xl sm:text-3xl font-extrabold mb-4 sm:mb-6
-        bg-gradient-to-r from-purple-600 to-pink-500
-        bg-clip-text text-transparent"
-      >
-        My Services
-      </motion.h2>
+      <div className="mb-4 sm:mb-6">
+        <motion.h2
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl sm:text-3xl font-extrabold
+          bg-gradient-to-r from-purple-600 to-pink-500
+          bg-clip-text text-transparent"
+        >
+          My Services
+        </motion.h2>
+        {user?.skill && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-600 mt-1"
+          >
+            Showing services for: <span className="font-semibold text-purple-600">{user.skill}</span>
+          </motion.p>
+        )}
+      </div>
+
+      {/* LOADING STATE */}
+      {loading && (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading services...</p>
+          </div>
+        </div>
+      )}
+
+      {/* ERROR STATE */}
+      {error && !loading && (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">Error</h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MAIN CONTENT */}
+      {!loading && !error && (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,10 +126,9 @@ export default function MyServices() {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="all">All Categories</option>
-            <option value="Cleaning">Cleaning</option>
-            <option value="Repair">Repair</option>
-            <option value="Electrical">Electrical</option>
-            <option value="Outdoor">Outdoor</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -121,10 +152,7 @@ export default function MyServices() {
               {/* SERVICE IMAGE */}
               <div className="h-48 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
                 <div className="text-4xl text-purple-600">
-                  {service.category === "Cleaning" && "🧹"}
-                  {service.category === "Repair" && "🔧"}
-                  {service.category === "Electrical" && "⚡"}
-                  {service.category === "Outdoor" && "🌿"}
+                  {service.icon || "🔧"}
                 </div>
               </div>
 
@@ -181,6 +209,7 @@ export default function MyServices() {
           </div>
         )}
       </motion.div>
+      )}
     </ServiceProviderLayout>
   );
 }

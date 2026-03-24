@@ -18,6 +18,7 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import Auth3D from "../assets/image.png";
+import { PROVIDER_CATEGORIES } from "../shared/services";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -328,14 +329,20 @@ const AuthPage = () => {
                         setForm({ ...form, phone: e.target.value })
                       }
                     />
-                    <Input
+                    <Select
                       icon={<FaTools />}
-                      placeholder="Skill (e.g. Electrician)"
                       value={form.skill}
                       onChange={(e) =>
                         setForm({ ...form, skill: e.target.value })
                       }
-                    />
+                    >
+                      <option value="">Select your category</option>
+                      {PROVIDER_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </Select>
                     <Input
                       icon={<FaCity />}
                       placeholder="City"

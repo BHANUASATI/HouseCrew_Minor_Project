@@ -5,9 +5,12 @@ import {
   FaUserCircle,
   FaBars,
   FaTimes,
+  FaSignOutAlt,
+  FaChevronDown,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/HouseCrewLogo.png";
+import { useAuth } from "../context/AuthContext";
 
 const searchTexts = [
   "Search home cleaning",
@@ -25,7 +28,9 @@ const navLinks = [
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   /* TYPEWRITER SEARCH */
   const [textIndex, setTextIndex] = useState(0);
@@ -49,6 +54,29 @@ export default function Navbar() {
       return () => clearTimeout(t);
     }
   }, [charIndex, textIndex]);
+
+  const handleProfile = () => {
+    if (user?.role === 'service_provider') {
+      navigate('/service-provider/profile');
+    } else if (user?.role === 'customer') {
+      navigate('/customer/profile');
+    }
+    setProfileOpen(false);
+  };
+
+  const handleDashboard = () => {
+    if (user?.role === 'service_provider') {
+      navigate('/service-provider/dashboard');
+    } else if (user?.role === 'customer') {
+      navigate('/customer/dashboard');
+    }
+    setProfileOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -126,20 +154,88 @@ export default function Navbar() {
               />
             </div>
 
-            {/* SIGN IN */}
+            {/* USER PROFILE / SIGN IN */}
             <div className="hidden md:block">
-              <button
-                onClick={() => navigate("/auth")}
-                className="
-                  px-5 py-2 rounded-full font-semibold
-                  bg-gradient-to-r from-orange-500 to-pink-500
-                  text-white
-                  shadow-lg shadow-orange-500/30
-                  hover:scale-105 transition
-                "
-              >
-                Sign In
-              </button>
+              {isAuthenticated && user ? (
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-white/20 transition-all"
+                  >
+                    {/* USER AVATAR */}
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+                      {user.profile_picture ? (
+                        <img 
+                          src={user.profile_picture.startsWith('data:') ? user.profile_picture : `data:image/jpeg;base64,${user.profile_picture}`} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <FaUserCircle className="text-xl" />
+                      )}
+                    </div>
+                    
+                    {/* USER NAME */}
+                    <span className="text-sm font-medium truncate max-w-[100px]">
+                      {user.name}
+                    </span>
+                    
+                    <FaChevronDown className={`text-xs transition-transform ${
+                      profileOpen ? 'rotate-180' : ''
+                    }`} />
+                  </motion.button>
+
+                  {/* PROFILE DROPDOWN */}
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 top-full mt-2 w-48 rounded-lg bg-white/95 backdrop-blur-xl border border-white/20 shadow-lg"
+                      >
+                        <button
+                          onClick={handleDashboard}
+                          className="w-full text-left px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-3"
+                        >
+                          <FaUserCircle className="text-gray-600" />
+                          <span className="text-sm">Dashboard</span>
+                        </button>
+                        <button
+                          onClick={handleProfile}
+                          className="w-full text-left px-4 py-3 text-gray-800 hover:bg-gray-100 transition-colors flex items-center gap-3"
+                        >
+                          <FaUserCircle className="text-gray-600" />
+                          <span className="text-sm">Profile</span>
+                        </button>
+                        <div className="border-t border-gray-200" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                        >
+                          <FaSignOutAlt />
+                          <span className="text-sm">Logout</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <button
+                  onClick={() => navigate("/auth")}
+                  className="
+                    px-5 py-2 rounded-full font-semibold
+                    bg-gradient-to-r from-orange-500 to-pink-500
+                    text-white
+                    shadow-lg shadow-orange-500/30
+                    hover:scale-105 transition
+                  "
+                >
+                  Sign In
+                </button>
+              )}
             </div>
 
             {/* MOBILE ICON */}
@@ -196,23 +292,80 @@ export default function Navbar() {
                 </NavLink>
               ))}
 
-              {/* SIGN IN */}
-              <button
-                onClick={() => {
-                  navigate("/auth");
-                  setMenuOpen(false);
-                }}
-                className="
-                  mt-4 w-full py-3 rounded-full
-                  font-bold text-white
-                  bg-gradient-to-r from-orange-500 to-pink-500
-                  shadow-xl shadow-orange-500/40
-                  hover:scale-105 transition
-                "
-              >
-                <FaUserCircle className="inline mr-2" />
-                Sign In
-              </button>
+              {/* USER PROFILE / SIGN IN */}
+              {isAuthenticated && user ? (
+                <div className="w-full space-y-3">
+                  {/* USER INFO */}
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+                      {user.profile_picture ? (
+                        <img 
+                          src={user.profile_picture.startsWith('data:') ? user.profile_picture : `data:image/jpeg;base64,${user.profile_picture}`} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <FaUserCircle className="text-2xl" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-semibold">{user.name}</p>
+                      <p className="text-white/70 text-sm capitalize">{user.role?.replace('_', ' ')}</p>
+                    </div>
+                  </div>
+
+                  {/* USER ACTIONS */}
+                  <button
+                    onClick={() => {
+                      handleDashboard();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full py-3 rounded-lg font-bold text-white bg-white/10 backdrop-blur hover:bg-white/20 transition flex items-center justify-center gap-2"
+                  >
+                    <FaUserCircle />
+                    Dashboard
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      handleProfile();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full py-3 rounded-lg font-bold text-white bg-white/10 backdrop-blur hover:bg-white/20 transition flex items-center justify-center gap-2"
+                  >
+                    <FaUserCircle />
+                    Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full py-3 rounded-lg font-bold text-red-400 bg-white/10 backdrop-blur hover:bg-red-900/20 transition flex items-center justify-center gap-2"
+                  >
+                    <FaSignOutAlt />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate("/auth");
+                    setMenuOpen(false);
+                  }}
+                  className="
+                    mt-4 w-full py-3 rounded-full
+                    font-bold text-white
+                    bg-gradient-to-r from-orange-500 to-pink-500
+                    shadow-xl shadow-orange-500/40
+                    hover:scale-105 transition
+                  "
+                >
+                  <FaUserCircle className="inline mr-2" />
+                  Sign In
+                </button>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -1,8 +1,9 @@
 import ServiceProviderLayout from "../ServiceProviderLayout";
 import StatCard from "../components/StatCard";
 import QuickAction from "../components/QuickAction";
-import ServiceTable from "../components/ServiceTable";
-import { FaPlus, FaMapMarkedAlt, FaWallet, FaStar, FaUser } from "react-icons/fa";
+// import ServiceTable from "../components/ServiceTable";
+// import ProviderLocation from "../components/ProviderLocation";
+import { FaMapMarkedAlt, FaWallet, FaStar, FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -11,9 +12,6 @@ export default function Dashboard() {
 
   const handleQuickAction = (action) => {
     switch(action) {
-      case 'new-service':
-        navigate('/service-provider/my-services');
-        break;
       case 'view-bookings':
         navigate('/service-provider/bookings');
         break;
@@ -70,9 +68,6 @@ export default function Dashboard() {
         {/* QUICK ACTIONS GRID - BIG SCREEN LARGER CARDS */}
         <div className="flex flex-col gap-4 max-sm:grid max-sm:grid-cols-1 sm:grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 max-sm:gap-4 sm:gap-4 lg:gap-6 xl:gap-8 mb-6 sm:mb-8">
         <div className="w-full sm:w-full">
-          <QuickAction icon={<FaPlus />} label="My Services" onClick={() => handleQuickAction('new-service')} />
-        </div>
-        <div className="w-full sm:w-full">
           <QuickAction icon={<FaMapMarkedAlt />} label="View Bookings" onClick={() => handleQuickAction('view-bookings')} />
         </div>
         <div className="w-full sm:w-full">
@@ -86,6 +81,11 @@ export default function Dashboard() {
         </div>
       </div>
 
+        {/* PROVIDER LOCATION - Temporarily commented out for debugging */}
+        {/* <div className="mb-6 sm:mb-8">
+          <ProviderLocation />
+        </div> */}
+
         {/* RECENT BOOKINGS TABLE */}
         <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 sm:p-5 lg:p-6">
@@ -94,7 +94,10 @@ export default function Dashboard() {
               Recent Bookings
             </h3>
             <div className="overflow-x-auto">
-              <ServiceTable />
+              {/* <ServiceTable /> */}
+              <div className="text-center py-8">
+                <p className="text-gray-600">Service requests will appear here</p>
+              </div>
             </div>
           </div>
         </div>

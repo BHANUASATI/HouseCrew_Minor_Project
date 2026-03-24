@@ -2,10 +2,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaBell, FaUser, FaSun, FaMoon, FaChevronDown, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleProfile = () => {
     navigate('/service-provider/profile');
@@ -18,9 +20,8 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    window.location.href = '/auth';
+    logout();
+    navigate('/auth');
   };
 
   return (
@@ -98,19 +99,27 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
               }`}
             >
               {/* USER AVATAR - ALWAYS VISIBLE */}
-              <div className={`w-6 h-6 sm:w-6 sm:h-6 lg:w-10 lg:h-10 rounded-full flex items-center justify-center ${
+              <div className={`w-6 h-6 sm:w-6 sm:h-6 lg:w-10 lg:h-10 rounded-full overflow-hidden flex items-center justify-center ${
                 darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'
               }`}>
-                <FaUser className="text-sm sm:text-xs lg:text-base" />
+                {user?.profile_picture ? (
+                  <img 
+                    src={user.profile_picture.startsWith('data:') ? user.profile_picture : `data:image/jpeg;base64,${user.profile_picture}`} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <FaUser className="text-sm sm:text-xs lg:text-base" />
+                )}
               </div>
               
               {/* USER INFO - HIDDEN ON MOBILE */}
               <div className="hidden sm:block text-left">
                 <p className={`text-[8px] sm:text-xs font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Provider
+                  {user?.name || 'Provider'}
                 </p>
                 <p className={`text-[8px] sm:text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Service Provider
+                  {user?.skill || 'Service Provider'}
                 </p>
               </div>
               

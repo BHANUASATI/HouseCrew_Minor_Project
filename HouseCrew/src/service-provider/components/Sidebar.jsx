@@ -2,7 +2,6 @@ import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaHome,
-  FaTools,
   FaCalendarAlt,
   FaWallet,
   FaUser,
@@ -14,7 +13,6 @@ import {
 
 const menu = [
   { name: "Dashboard", path: "/service-provider/dashboard", icon: FaHome },
-  { name: "My Services", path: "/service-provider/my-services", icon: FaTools },
   { name: "Bookings", path: "/service-provider/bookings", icon: FaCalendarAlt },
   { name: "Earnings", path: "/service-provider/earnings", icon: FaWallet },
   { name: "Reviews", path: "/service-provider/reviews", icon: FaStar },

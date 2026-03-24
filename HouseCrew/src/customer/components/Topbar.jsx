@@ -1,13 +1,21 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { FaBars, FaBell, FaUser, FaSun, FaMoon, FaChevronDown, FaSignOutAlt, FaCog } from "react-icons/fa";
-import { useState } from "react";
+import { FaBars, FaUser, FaSun, FaMoon, FaChevronDown, FaSignOutAlt, FaCog } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Notifications from "./Notifications";
 
 export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+
+  // Log when user profile picture changes
+  useEffect(() => {
+    if (user?.profile_picture) {
+      console.log('Topbar: User profile picture updated');
+    }
+  }, [user?.profile_picture]);
 
   const handleProfile = () => {
     navigate('/customer/profile');
@@ -74,20 +82,9 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
           </motion.button>
 
           {/* NOTIFICATIONS */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`relative p-2 sm:p-1.5 lg:p-2 rounded-lg transition-colors ${
-              darkMode 
-                ? 'hover:bg-gray-700 text-white' 
-                : 'hover:bg-gray-100 text-gray-800'
-            }`}
-          >
-            <FaBell className="text-sm sm:text-sm lg:text-xl" />
-            <span className="absolute top-1 right-1 w-1.5 h-1.5 sm:top-0.5 sm:right-0.5 sm:w-1.5 sm:h-1.5 bg-red-500 rounded-full"></span>
-          </motion.button>
+          <Notifications />
 
-          {/* USER PROFILE - ALWAYS VISIBLE */}
+          {/* USER PROFILE SECTION - EXPANDED */}
           <div className="relative">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -100,10 +97,19 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
               }`}
             >
               {/* USER AVATAR - ALWAYS VISIBLE */}
-              <div className={`w-6 h-6 sm:w-6 sm:h-6 lg:w-10 lg:h-10 rounded-full flex items-center justify-center ${
+              <div className={`w-6 h-6 sm:w-6 sm:h-6 lg:w-10 lg:h-10 rounded-full flex items-center justify-center overflow-hidden ${
                 darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'
               }`}>
-                <FaUser className="text-sm sm:text-xs lg:text-base" />
+                {user?.profile_picture ? (
+                  <img 
+                    key={user.profile_picture} // Force re-render when profile picture changes
+                    src={user.profile_picture} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <FaUser className="text-sm sm:text-xs lg:text-base" />
+                )}
               </div>
               
               {/* USER INFO - HIDDEN ON MOBILE */}
@@ -122,50 +128,114 @@ export default function Topbar({ onMenuClick, isMobile, darkMode, toggleTheme })
               }`} />
             </motion.button>
 
-            {/* PROFILE DROPDOWN */}
+            {/* PROFILE DROPDOWN - EXPANDED WITH DETAILS */}
             <AnimatePresence>
               {profileOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`absolute right-0 top-full mt-0.5 sm:mt-1 lg:mt-2 w-32 sm:w-40 lg:w-48 rounded-lg shadow-lg border ${
+                  className={`absolute right-0 top-full mt-0.5 sm:mt-1 lg:mt-2 w-64 sm:w-72 lg:w-80 rounded-lg shadow-lg border ${
                     darkMode 
                       ? 'bg-gray-800 border-gray-700' 
                       : 'bg-white border-gray-200'
                   }`}
                 >
-                <button
-                  onClick={handleProfile}
-                  className={`w-full text-left px-2 sm:px-3 lg:px-4 py-1 sm:py-2 lg:py-3 flex items-center gap-1 sm:gap-2 lg:gap-3 transition-colors ${
-                    darkMode 
-                      ? 'hover:bg-gray-700 text-white' 
-                      : 'hover:bg-gray-50 text-gray-800'
-                  }`}
-                >
-                  <FaUser className="text-[8px] sm:text-xs" />
-                  <span className="text-[8px] sm:text-xs">Profile</span>
-                </button>
-                <button
-                  onClick={handleSettings}
-                  className={`w-full text-left px-2 sm:px-3 lg:px-4 py-1 sm:py-2 lg:py-3 flex items-center gap-1 sm:gap-2 lg:gap-3 transition-colors ${
-                    darkMode 
-                      ? 'hover:bg-gray-700 text-white' 
-                      : 'hover:bg-gray-50 text-gray-800'
-                  }`}
-                >
-                  <FaCog className="text-[8px] sm:text-xs" />
-                  <span className="text-[8px] sm:text-xs">Settings</span>
-                </button>
-                <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`} />
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-2 sm:px-3 lg:px-4 py-1 sm:py-2 lg:py-3 flex items-center gap-1 sm:gap-2 lg:gap-3 transition-colors text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <FaSignOutAlt className="text-[8px] sm:text-xs" />
-                  <span className="text-[8px] sm:text-xs">Logout</span>
-                </button>
-              </motion.div>
+                  {/* PROFILE HEADER */}
+                  <div className={`p-3 sm:p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center overflow-hidden ${
+                        darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'
+                      }`}>
+                        {user?.profile_picture ? (
+                          <img 
+                            src={user.profile_picture} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <FaUser className="text-lg sm:text-xl" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`font-semibold text-sm sm:text-base ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                          {user?.name || 'Guest'}
+                        </h4>
+                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Customer Dashboard
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* PROFILE DETAILS */}
+                  <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+                    <div className="space-y-1">
+                      <p className={`text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</p>
+                      <p className={`text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>{user?.name || 'N/A'}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className={`text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</p>
+                      <p className={`text-sm ${darkMode ? 'text-white' : 'text-gray-800'} truncate`}>{user?.email || 'N/A'}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className={`text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Phone</p>
+                      <p className={`text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>{user?.phone || 'Not provided'}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className={`text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>City</p>
+                      <p className={`text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>{user?.city || 'Not provided'}</p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className={`text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Member Since</p>
+                      <p className={`text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        }) : 'Today'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* ACTIONS */}
+                  <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <button
+                      onClick={handleProfile}
+                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 transition-colors ${
+                        darkMode 
+                          ? 'hover:bg-gray-700 text-white' 
+                          : 'hover:bg-gray-50 text-gray-800'
+                      }`}
+                    >
+                      <FaUser className="text-xs sm:text-sm" />
+                      <span className="text-xs sm:text-sm">View Profile</span>
+                    </button>
+                    <button
+                      onClick={handleSettings}
+                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 transition-colors ${
+                        darkMode 
+                          ? 'hover:bg-gray-700 text-white' 
+                          : 'hover:bg-gray-50 text-gray-800'
+                      }`}
+                    >
+                      <FaCog className="text-xs sm:text-sm" />
+                      <span className="text-xs sm:text-sm">Settings</span>
+                    </button>
+                    <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`} />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 transition-colors text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <FaSignOutAlt className="text-xs sm:text-sm" />
+                      <span className="text-xs sm:text-sm">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>

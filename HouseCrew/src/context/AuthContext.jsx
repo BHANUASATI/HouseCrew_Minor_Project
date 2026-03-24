@@ -53,6 +53,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -64,6 +69,7 @@ export const AuthProvider = ({ children }) => {
       error,
       setError,
       clearError,
+      updateUser,
       isAuthenticated: ApiService.isAuthenticated()
     }}>
       {children}
