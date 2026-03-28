@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Geocoding</title>
+</head>
+<body>
+    <h1>Test Geocoding Function</h1>
+    <input type="text" id="addressInput" style="width: 400px; padding: 10px;" 
+           value="K.R. Mangalam University, Badshahpur Sohna Rd, Gurugram, Sohna Rural, Haryana 122103">
+    <button onclick="testGeocoding()" style="padding: 10px;">Geocode Address</button>
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <script>
+        // Copy the LocationUtils functions here for testing
+        class LocationUtils {
+            static getKnownLocation(address) {
+                const knownLocations = {
+                    'k.r. mangalam university': {
+                        latitude: 28.4569188,
+                        longitude: 77.0646046,
+                        name: 'K.R. Mangalam University',
+                        address: 'K.R. Mangalam University, Badshahpur Sohna Rd, Gurugram, Haryana 122103',
+                        city: 'Gurugram',
+                        state: 'Haryana'
+                    },
+                    'kr mangalam university': {
+                        latitude: 28.4569188,
+                        longitude: 77.0646046,
+                        name: 'K.R. Mangalam University',
+                        address: 'K.R. Mangalam University, Badshahpur Sohna Rd, Gurugram, Haryana 122103',
+                        city: 'Gurugram',
+                        state: 'Haryana'
+                    },
+                    'mangalam university': {
+                        latitude: 28.4569188,
+                        longitude: 77.0646046,
+                        name: 'K.R. Mangalam University',
+                        address: 'K.R. Mangalam University, Badshahpur Sohna Rd, Gurugram, Haryana 122103',
+                        city: 'Gurugram',
+                        state: 'Haryana'
+                    }
+                };
+
+                const addressLower = address.toLowerCase();
+                
+                for (const [key, location] of Object.entries(knownLocations)) {
+                    if (addressLower.includes(key)) {
+                        return location;
+                    }
+                }
+                
+                return null;
+            }
+
+            static async geocodeWithMapsCo(address) {
+                const apiKey = '69c7572eea0e4591472196pce879a88';
+                const response = await fetch(
+                    `https://geocode.maps.co/search?q=${encodeURIComponent(address)}&api_key=${apiKey}`
+                );
+
+                if (!response.ok) {
+                    throw new Error('geocode.maps.co API request failed');
+                }
+
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    throw new Error('No results found in geocode.maps.co');
+                }
+
+                const result = data[0];
+                return {
+                    ...result,
+                    latitude: parseFloat(result.lat),
+                    longitude: parseFloat(result.lon)
+                };
+            }
+
+            static async geocodeWithNominatim(address) {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&addressdetails=1&limit=1`,
+                    {
+                        headers: {
+                            'User-Agent': 'HouseCrew/1.0'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Nominatim API request failed');
+                }
+
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    throw new Error('No results found in Nominatim');
+                }
+
+                const result = data[0];
+                return {
+                    ...result,
+                    latitude: parseFloat(result.lat),
+                    longitude: parseFloat(result.lon)
+                };
+            }
+
+            static async geocodeWithCityFallback(address) {
+                // First check if it's a known specific location
+                const knownLocation = this.getKnownLocation(address);
+                if (knownLocation) {
+                    console.log('Found known location:', knownLocation);
+                    return {
+                        latitude: knownLocation.latitude,
+                        longitude: knownLocation.longitude,
+                        address: knownLocation.address,
+                        place_id: 'known_location',
+                        address: {
+                            name: knownLocation.name,
+                            city: knownLocation.city,
+                            state: knownLocation.state,
+                            country: 'India'
+                        }
+                    };
+                }
+
+                throw new Error('Could not find location');
+            }
+
+            static async forwardGeocode(address) {
+                try {
+                    // Try multiple geocoding services in order
+                    const geocodingServices = [
+                        { name: 'geocodeWithMapsCo', fn: this.geocodeWithMapsCo },
+                        { name: 'geocodeWithNominatim', fn: this.geocodeWithNominatim },
+                        { name: 'geocodeWithCityFallback', fn: this.geocodeWithCityFallback }
+                    ];
+
+                    let lastError = null;
+                    
+                    for (const service of geocodingServices) {
+                        try {
+                            console.log(`Trying geocoding service: ${service.name}`);
+                            const result = await service.fn.call(this, address);
+                            
+                            if (result && result.latitude && result.longitude) {
+                                console.log(`✅ Geocoding successful with ${service.name}:`, result);
+                                return {
+                                    latitude: result.latitude,
+                                    longitude: result.longitude,
+                                    address: result.address || address,
+                                    service_used: service.name
+                                };
+                            }
+                        } catch (error) {
+                            console.warn(`❌ ${service.name} failed:`, error.message);
+                            lastError = error;
+                            continue;
+                        }
+                    }
+
+                    throw lastError || new Error('All geocoding services failed');
+                } catch (error) {
+                    console.error('Forward geocoding error:', error);
+                    throw error;
+                }
+            }
+        }
+
+        async function testGeocoding() {
+            const address = document.getElementById('addressInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<p>Testing geocoding...</p>';
+            
+            try {
+                const result = await LocationUtils.forwardGeocode(address);
+                resultDiv.innerHTML = `
+                    <h3>✅ Geocoding Successful</h3>
+                    <p><strong>Address:</strong> ${address}</p>
+                    <p><strong>Latitude:</strong> ${result.latitude}</p>
+                    <p><strong>Longitude:</strong> ${result.longitude}</p>
+                    <p><strong>Formatted Address:</strong> ${result.address}</p>
+                    <p><strong>Service Used:</strong> ${result.service_used}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>❌ Geocoding Failed</h3>
+                    <p><strong>Address:</strong> ${address}</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
